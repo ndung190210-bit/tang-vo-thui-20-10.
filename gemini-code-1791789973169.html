@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chúc Mừng 20/10 - Ngày Phụ Nữ Việt Nam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Montserrat:wght@400;600;700;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      min-height: 100vh;
+      background: radial-gradient(circle at center, #1f0b18 0%, #0d040a 60%, #050104 100%);
+      color: #fff;
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #matrixCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+
+    .main-wrapper {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      max-width: 850px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* ĐẾM NGƯỢC */
+    #countdownStage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+    }
+
+    .count-number {
+      font-size: clamp(6rem, 20vw, 12rem);
+      font-weight: 900;
+      color: #ff6ea7;
+      text-shadow: 0 0 25px rgba(255, 110, 167, 0.8), 0 0 50px rgba(255, 46, 126, 0.6);
+      opacity: 0;
+      transform: scale(0.3);
+      transition: transform 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+    }
+
+    .count-number.active {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+
+    /* TIÊU ĐỀ 20/10 */
+    #bannerStage {
+      text-align: center;
+      opacity: 0;
+      transform: translateY(30px) scale(0.9);
+      transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+      margin-bottom: 24px;
+      display: none;
+    }
+
+    #bannerStage.visible {
+      display: block;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .tagline {
+      font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+      font-weight: 600;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: #ff9cc3;
+      margin-bottom: 12px;
+      text-shadow: 0 0 10px rgba(255, 156, 195, 0.6);
+    }
+
+    .neon-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 6.5vw, 4rem);
+      font-weight: 700;
+      color: #fff0f6;
+      line-height: 1.2;
+      text-shadow: 
+        0 0 10px rgba(255, 87, 147, 0.8),
+        0 0 25px rgba(255, 87, 147, 0.6),
+        0 0 50px rgba(230, 15, 98, 0.5);
+    }
+
+    /* PHONG BÌ THƯ */
+    #envelopeStage {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      height: 380px;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1.2s ease, transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+      display: none;
+      perspective: 1200px;
+    }
+
+    #envelopeStage.visible {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .envelope-box {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #73132e;
+      border-radius: 12px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 35px rgba(255, 46, 126, 0.25);
+    }
+
+    .env-flap-back {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 0;
+      border-left: 300px solid transparent;
+      border-right: 300px solid transparent;
+      border-top: 200px solid #570a20;
+      transform-origin: top;
+      transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 2;
+    }
+
+    .env-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 300px solid #851837;
+      border-right: 300px solid #851837;
+      border-top: 190px solid transparent;
+      border-bottom: 190px solid #851837;
+      border-radius: 0 0 12px 12px;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    .wax-seal {
+      position: absolute;
+      top: 140px;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 58px;
+      height: 58px;
+      background: radial-gradient(circle, #e6194b, #990024);
+      border-radius: 50%;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.4);
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      color: #ffe6eb;
+      transition: transform 0.6s ease, opacity 0.6s ease;
+    }
+
+    /* BỨC THƯ BÊN TRONG */
+    .letter-paper {
+      position: absolute;
+      top: 18px;
+      left: 5%;
+      width: 90%;
+      background: #fbf7ef;
+      color: #2b1d1f;
+      border-radius: 10px;
+      padding: 32px 28px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+      z-index: 3;
+      transform: translateY(0);
+      transition: transform 1.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 1s ease;
+      max-height: 340px;
+      overflow-y: auto;
+    }
+
+    /* TRẠNG THÁI MỞ THƯ */
+    .envelope-box.opened .env-flap-back {
+      transform: rotateX(180deg);
+      z-index: 1;
+    }
+
+    .envelope-box.opened .wax-seal {
+      transform: translate(-50%, -80px) scale(0);
+      opacity: 0;
+    }
+
+    .envelope-box.opened .letter-paper {
+      transform: translateY(-90px);
+      z-index: 6;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+    }
+
+    .letter-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      color: #941738;
+      border-bottom: 1.5px dashed #dfb8c2;
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .letter-body {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.45rem;
+      line-height: 1.8;
+      color: #381a24;
+      min-height: 130px;
+      white-space: pre-wrap;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1.3rem;
+      background-color: #941738;
+      vertical-align: middle;
+      animation: blink 0.8s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    @media (max-width: 600px) {
+      #envelopeStage {
+        height: 330px;
+      }
+      .env-flap-back {
+        border-left-width: 45vw;
+        border-right-width: 45vw;
+        border-top-width: 170px;
+      }
+      .env-bottom {
+        border-left-width: 45vw;
+        border-right-width: 45vw;
+        border-top-width: 165px;
+        border-bottom-width: 165px;
+      }
+      .letter-paper {
+        padding: 22px 18px;
+        max-height: 290px;
+      }
+      .envelope-box.opened .letter-paper {
+        transform: translateY(-50px);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="matrixCanvas"></canvas>
+
+  <div class="main-wrapper">
+    <!-- Đếm ngược -->
+    <div id="countdownStage">
+      <div id="countDisplay" class="count-number">3</div>
+    </div>
+
+    <!-- Tiêu đề 20/10 -->
+    <div id="bannerStage">
+      <div class="tagline">20/10 • Ngày Phụ Nữ Việt Nam</div>
+      <h1 class="neon-title">Chúc Mừng 20/10 Em Yêu 💐</h1>
+    </div>
+
+    <!-- Phong bì thư -->
+    <div id="envelopeStage">
+      <div class="envelope-box" id="envelopeBox">
+        <div class="env-flap-back"></div>
+        <div class="env-bottom"></div>
+        <div class="wax-seal">💌</div>
+        
+        <div class="letter-paper">
+          <h2 class="letter-heading">Gửi cô gái tuyệt vời nhất của anh 🌸</h2>
+          <div class="letter-body">
+            <span id="typewriterText"></span><span class="cursor" id="cursor"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Matrix Rain Effect (Mưa chữ)
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const loveWords = [
+      'LOVE', 'I LOVE YOU', '♥', '20/10', 'YÊU EM', 
+      'XINH ĐẸP', 'HAPPY 20/10', 'HẠNH PHÚC', 'MÃI YÊU', 'MY LOVE', 'DÀNH CHO EM'
+    ];
+    const fontSize = 16;
+    const columns = Math.floor(width / (fontSize * 3.5));
+    const drops = [];
+
+    for (let i = 0; i < columns; i++) {
+      drops[i] = Math.random() * -100;
+    }
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(5, 1, 4, 0.12)';
+      ctx.fillRect(0, 0, width, height);
+      ctx.font = 'bold ' + fontSize + 'px Montserrat';
+
+      for (let i = 0; i < drops.length; i++) {
+        const word = loveWords[Math.floor(Math.random() * loveWords.length)];
+        const isHighlight = Math.random() > 0.88;
+        
+        ctx.fillStyle = isHighlight ? '#ffeff6' : '#ff4d8d';
+        ctx.shadowBlur = isHighlight ? 12 : 6;
+        ctx.shadowColor = '#ff2b75';
+
+        ctx.fillText(word, i * fontSize * 3.5, drops[i] * fontSize);
+        ctx.shadowBlur = 0;
+
+        if (drops[i] * fontSize > height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    // KỊCH BẢN CHẠY TỰ ĐỘNG
+    const countDisplay = document.getElementById('countDisplay');
+    const countdownStage = document.getElementById('countdownStage');
+    const bannerStage = document.getElementById('bannerStage');
+    const envelopeStage = document.getElementById('envelopeStage');
+    const envelopeBox = document.getElementById('envelopeBox');
+
+    const message = 
+`Nhân ngày Phụ nữ Việt Nam 20/10, chúc em luôn luôn xinh đẹp, rạng rỡ và ngập tràn hạnh phúc! 
+
+Cảm ơn vì đã luôn ở bên cạnh, mang đến cho anh thật nhiều niềm vui và những điều ngọt ngào. Mong rằng mỗi ngày trôi qua em đều luôn cười thật tươi nhé! 
+
+Yêu em thật nhiều! ♥✨`;
+
+    let letterIndex = 0;
+    function typeWriter() {
+      if (letterIndex < message.length) {
+        document.getElementById('typewriterText').textContent += message.charAt(letterIndex);
+        letterIndex++;
+        setTimeout(typeWriter, 40);
+      } else {
+        document.getElementById('cursor').style.display = 'none';
+      }
+    }
+
+    window.addEventListener('load', () => {
+      let count = 3;
+      countDisplay.textContent = count;
+      countDisplay.classList.add('active');
+
+      const countInterval = setInterval(() => {
+        countDisplay.classList.remove('active');
+        count--;
+
+        if (count > 0) {
+          setTimeout(() => {
+            countDisplay.textContent = count;
+            countDisplay.classList.add('active');
+          }, 150);
+        } else {
+          clearInterval(countInterval);
+          setTimeout(() => {
+            // Ẩn đếm ngược & Bật mưa chữ
+            countdownStage.style.display = 'none';
+            canvas.style.opacity = '1';
+            setInterval(drawMatrix, 45);
+
+            // Hiện tiêu đề 20/10
+            bannerStage.classList.add('visible');
+
+            // Hiện phong bì & Tự động mở thư
+            setTimeout(() => {
+              envelopeStage.classList.add('visible');
+              setTimeout(() => {
+                envelopeBox.classList.add('opened');
+                setTimeout(typeWriter, 1200);
+              }, 1000);
+            }, 800);
+          }, 300);
+        }
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
